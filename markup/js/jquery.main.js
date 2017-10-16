@@ -3,9 +3,8 @@ jQuery(function () {
 });
 
 function initSortText() {
-    jQuery('#sort').textSort({});
+    jQuery('#sort').textSort();
 };
-
 
 //initOpenPanel
 ;(function ($) {
@@ -13,14 +12,13 @@ function initSortText() {
         this.options = $.extend({
             text: '.text',
             oneItemWrap: 'li',
-            btn: '.btn',
             activeClass: 'active',
-            asc:'asc',
-            desc:'desc',
+            asc: 'asc',
+            desc: 'desc',
             setEvent: 'click'
         }, options);
         this.init();
-    };
+    }
     TextSort.prototype = {
         init: function () {
             if (this.options.holder) {
@@ -30,35 +28,46 @@ function initSortText() {
         },
         findElements: function () {
             this.holder = $(this.options.holder);
-            this.textWrap = $(this.holder.find(this.options.text));
-            this.items = this.textWrap.text().replace(/\s{2,}/g, ' ').trim().split(' ');
-            this.btns = this.holder.find((this.options.btn));
+            this.btnAsc = $('.' + this.options.asc);
+            this.btnDesc = $('.' + this.options.desc);
+            this.items = this.getItems();
+            this.textWrap = this.holder.find(this.options.text).find(this.options.oneItemWrap);
         },
         attachEvents: function () {
             var self = this;
-            console.log(this.btn);
-            this.btns.on(self.options.setEvent, function () {
-                self.btns.removeClass(self.options.activeClass);
+            this.btnAsc.on(self.options.setEvent, function () {
                 $(this).addClass(self.options.activeClass);
-                ($(this).data('sort') === self.options.asc) ? self.sortAsc() : ($(this).data('sort') === self.options.desc) ? self.sortDesc() : 0;
+                self.btnDesc.removeClass(self.options.activeClass);
+                self.sortAsc();
             });
-
+            this.btnDesc.on(self.options.setEvent, function () {
+                $(this).addClass(self.options.activeClass);
+                self.btnAsc.removeClass(self.options.activeClass);
+                self.sortDesc();
+            });
         },
         sortAsc: function () {
             this.items.sort();
-            this.textWrap.html(this.addWrap());
+            this.returnItems();
         },
         sortDesc: function () {
-            this.items.sort().reverse();
-            this.textWrap.html(this.addWrap());
-        },
-        addWrap: function () {
-            var self = this;
-            var result = [];
-            $(this.items).each(function (index) {
-                result[index] = '<' + self.options.oneItemWrap + '>' + this + '<' + self.options.oneItemWrap + '>';
+            var self = this, length = this.items.length - 1;
+            this.items = this.items.sort().map(function (i) {
+                return self.items[length-i];
             });
-            return result;
+            this.returnItems();
+        },
+        getItems: function () {
+            return this.holder.find(this.options.text).find(this.options.oneItemWrap).map(function (i, el) {
+                    return $(el).text();
+                }
+            );
+        },
+        returnItems: function () {
+            var self = this;
+            this.items.each(function (i,el) {
+                $(self.textWrap.get(i)).text(el);
+            })
         },
         myCallback: function (name) {
             if (typeof this.options[name] === 'function') {
@@ -68,7 +77,8 @@ function initSortText() {
             }
         },
         destroy: function () {
-            this.btns.off('click');
+            this.asc.off(this.options.setEvent);
+            this.desc.off(this.options.setEvent);
         }
     };
     // jquery plugin
