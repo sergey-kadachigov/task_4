@@ -19,6 +19,7 @@ function initSortText() {
         }, options);
         this.init();
     }
+
     TextSort.prototype = {
         init: function () {
             if (this.options.holder) {
@@ -53,7 +54,7 @@ function initSortText() {
         sortDesc: function () {
             var self = this, length = this.items.length - 1;
             this.items = this.items.sort().map(function (i) {
-                return self.items[length-i];
+                return self.items[length - i];
             });
             this.returnItems();
         },
@@ -65,7 +66,7 @@ function initSortText() {
         },
         returnItems: function () {
             var self = this;
-            this.items.each(function (i,el) {
+            this.items.each(function (i, el) {
                 $(self.textWrap.get(i)).text(el);
             })
         },
